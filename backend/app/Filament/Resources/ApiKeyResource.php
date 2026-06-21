@@ -13,10 +13,11 @@ use Filament\Tables\Table;
 class ApiKeyResource extends Resource
 {
     protected static ?string $model = ApiKey::class;
-    protected static ?string $navigationIcon = 'heroicon-o-key';
-    protected static ?string $navigationLabel = 'API Keyler';
-    protected static ?string $modelLabel = 'API Key';
-    protected static ?int $navigationSort = 3;
+   protected static ?string $navigationIcon = 'heroicon-o-key';
+protected static ?string $navigationLabel = 'API Keyler';
+protected static ?string $modelLabel = 'API Key';
+protected static ?string $pluralModelLabel = 'API Keyler';
+protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

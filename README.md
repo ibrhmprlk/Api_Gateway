@@ -34,12 +34,12 @@ API Gateway is a full-stack SaaS platform where developers can register, obtain 
 |---|---|
 | Backend | Laravel 11, PHP 8.3 |
 | Frontend | Next.js 15, TypeScript, Tailwind CSS, shadcn/ui |
+| Admin Panel | Filament v3 |
 | Database | PostgreSQL 16 (Supabase) |
 | Cache & Queue | Redis, Laravel Queue |
 | Real-time | Pusher + Laravel Echo |
 | Payments | Stripe API (test mode) |
 | Auth | Laravel Sanctum + Google OAuth (Socialite) |
-| Documentation | Swagger / OpenAPI |
 | Local Dev | Docker + Compose, Nginx |
 | Deployment | Render.com (API) + Netlify (Frontend) |
 
@@ -50,7 +50,7 @@ API Gateway is a full-stack SaaS platform where developers can register, obtain 
 ```
 Browser
   └─ Next.js Frontend (Netlify)
-      /  |  /dashboard  |  /keys  |  /logs  |  /webhooks  |  /billing  |  /docs
+      /  |  /dashboard  |  /keys  |  /logs  |  /webhooks  |  /billing
       │  HTTP/JSON + Bearer token
       ▼
  Laravel API (Render.com)
@@ -78,9 +78,8 @@ Browser
 - Define webhook URLs for limit breach and error notifications
 - View a real-time usage chart on the dashboard (Pusher + Laravel Echo)
 - Filter and inspect request logs by endpoint and status code
-- Test any endpoint directly in the browser via the Sandbox page
 
-#### Admin
+#### Admin (Filament v3)
 - List, manage, and suspend developer accounts
 - Update plan limits and pricing
 - View all request logs across all users
@@ -131,8 +130,6 @@ All responses cached in Redis (5 min TTL).
 | `/` | Landing page — features, pricing, CTA |
 | `/register` · `/login` | Authentication (email + Google OAuth) |
 | `/forgot-password` · `/reset-password` | Password reset flow |
-| `/docs` | Swagger UI — all endpoints documented |
-| `/sandbox` | Live API testing with a test key |
 | `/dashboard` | Real-time chart, summary stats, recent requests |
 | `/keys` | Key list, permissions, IP rules, rotation |
 | `/logs` | Request history — filter by endpoint and status |
@@ -156,8 +153,8 @@ All responses cached in Redis (5 min TTL).
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-username/api-gateway.git
-cd api-gateway
+git clone https://github.com/ibrhmprlk/Api_Gateway.git
+cd Api_Gateway
 
 # 2. Start Docker services
 docker compose up -d
@@ -251,12 +248,12 @@ API Gateway, geliştiricilerin kayıt olup otomatik API key aldığı, hava duru
 |---|---|
 | Backend | Laravel 11, PHP 8.3 |
 | Frontend | Next.js 15, TypeScript, Tailwind CSS, shadcn/ui |
+| Admin Panel | Filament v3 |
 | Veritabanı | PostgreSQL 16 (Supabase) |
 | Cache & Queue | Redis, Laravel Queue |
 | Gerçek Zamanlı | Pusher + Laravel Echo |
 | Ödeme | Stripe API (test modu) |
 | Kimlik Doğrulama | Laravel Sanctum + Google OAuth (Socialite) |
-| Dökümantasyon | Swagger / OpenAPI |
 | Yerel Geliştirme | Docker + Compose, Nginx |
 | Deploy | Render.com (API) + Netlify (Frontend) |
 
@@ -267,7 +264,7 @@ API Gateway, geliştiricilerin kayıt olup otomatik API key aldığı, hava duru
 ```
 Tarayıcı
   └─ Next.js Frontend (Netlify)
-      /  |  /dashboard  |  /keys  |  /logs  |  /webhooks  |  /billing  |  /docs
+      /  |  /dashboard  |  /keys  |  /logs  |  /webhooks  |  /billing
       │  HTTP/JSON + Bearer token
       ▼
  Laravel API (Render.com)
@@ -295,9 +292,8 @@ Tarayıcı
 - Webhook URL tanımlama — limit veya hata bildirimlerini al
 - Dashboard'da gerçek zamanlı kullanım grafiği (Pusher + Laravel Echo)
 - İstek loglarını endpoint ve durum koduna göre filtrele
-- Sandbox sayfasında test key ile API'leri tarayıcıdan dene
 
-#### Admin
+#### Admin (Filament v3)
 - Geliştirici hesaplarını listele, yönet, askıya al
 - Plan limitlerini ve fiyatlandırmayı güncelle
 - Tüm kullanıcıların request loglarını görüntüle
@@ -348,8 +344,6 @@ Tüm yanıtlar Redis'te cache'lenir (5 dk TTL).
 | `/` | Landing — özellikler, planlar, CTA |
 | `/register` · `/login` | Kimlik doğrulama (email + Google OAuth) |
 | `/forgot-password` · `/reset-password` | Şifre sıfırlama akışı |
-| `/docs` | Swagger UI — tüm endpointler dökümante edilmiş |
-| `/sandbox` | Test key ile canlı API testi |
 | `/dashboard` | Gerçek zamanlı grafik, özet istatistikler, son istekler |
 | `/keys` | Key listesi, izinler, IP kuralları, yenileme |
 | `/logs` | İstek geçmişi — endpoint ve durum koduna göre filtre |
@@ -373,8 +367,8 @@ Tüm yanıtlar Redis'te cache'lenir (5 dk TTL).
 
 ```bash
 # 1. Klonla
-git clone https://github.com/your-username/api-gateway.git
-cd api-gateway
+git clone https://github.com/ibrhmprlk/Api_Gateway.git
+cd Api_Gateway
 
 # 2. Docker servislerini başlat
 docker compose up -d
@@ -443,3 +437,6 @@ MAIL_PASSWORD=
 MAIL_FROM_ADDRESS=noreply@yourdomain.com
 MAIL_FROM_NAME="${APP_NAME}"
 ```
+### Lisans
+
+MIT

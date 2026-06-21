@@ -437,6 +437,9 @@ MAIL_PASSWORD=
 MAIL_FROM_ADDRESS=noreply@yourdomain.com
 MAIL_FROM_NAME="${APP_NAME}"
 ```
+
+---
+
 ### Lisans
 
 MIT

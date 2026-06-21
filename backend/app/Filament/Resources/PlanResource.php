@@ -13,10 +13,11 @@ use Filament\Tables\Table;
 class PlanResource extends Resource
 {
     protected static ?string $model = Plan::class;
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationLabel = 'Planlar';
-    protected static ?string $modelLabel = 'Plan';
-    protected static ?int $navigationSort = 2;
+   protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+protected static ?string $navigationLabel = 'Planlar';
+protected static ?string $modelLabel = 'Plan';
+protected static ?string $pluralModelLabel = 'Planlar';
+protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

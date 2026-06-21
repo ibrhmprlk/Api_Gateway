@@ -189,8 +189,8 @@ export default function BillingPage() {
   const hasActiveSubscription =
     billing?.subscription_status === "active" && isPro;
   const currentPlan = billing?.plan;
-  const freePlan = plans.find((p) => p.name.toLowerCase() === "free");
-  const proPlan = plans.find((p) => p.name.toLowerCase() === "pro");
+const freePlan = plans.find((p) => p.name.toLowerCase() === "free");
+const proPlan = plans.find((p) => p.name.toLowerCase() === "pro");
   return (
     <div className="space-y-6">
       <div>

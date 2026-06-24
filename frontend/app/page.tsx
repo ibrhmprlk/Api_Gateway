@@ -26,12 +26,14 @@ interface Plan {
 
 export default function LandingPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api
       .get("/plans")
       .then((res) => setPlans(res.data))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const freePlan = plans.find((p) => p.name.toLowerCase() === "free");
@@ -181,7 +183,9 @@ export default function LandingPage() {
               </div>
             </div>
             <ul className="space-y-2.5 mb-6">
-              {freePlan ? (
+              {loading ? (
+                <li className="text-sm text-zinc-500">Yükleniyor...</li>
+              ) : freePlan ? (
                 <>
                   <li className="flex items-center gap-2 text-sm text-zinc-400">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -200,7 +204,7 @@ export default function LandingPage() {
                           {key}
                         </span>
                       </li>
-                    ),
+                    )
                   )}
                 </>
               ) : (
@@ -240,7 +244,9 @@ export default function LandingPage() {
               </div>
             </div>
             <ul className="space-y-2.5 mb-6">
-              {proPlan ? (
+              {loading ? (
+                <li className="text-sm text-zinc-500">Yükleniyor...</li>
+              ) : proPlan ? (
                 <>
                   <li className="flex items-center gap-2 text-sm text-zinc-400">
                     <Check className="w-4 h-4 text-indigo-400 shrink-0" />
@@ -259,7 +265,7 @@ export default function LandingPage() {
                           {key}
                         </span>
                       </li>
-                    ),
+                    )
                   )}
                 </>
               ) : (
@@ -320,7 +326,6 @@ const features = [
   },
 ];
 
-// API çağrısı başarısız olursa gösterilecek fallback veriler
 const freePlanFallback = [
   "60 istek / dakika",
   "Hava durumu API erişimi",

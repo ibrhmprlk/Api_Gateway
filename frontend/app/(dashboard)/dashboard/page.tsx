@@ -131,7 +131,7 @@ export default function DashboardPage() {
             <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
             <div>
               <p className="text-sm font-medium text-amber-300">
-                Ücretsiz Plan —{stats.plan_limit} Talep/Dakika
+                Ücretsiz Plan — {stats.plan_limit} Talep/Dakika
               </p>
               <p className="text-xs text-amber-500/70 mt-0.5">
                 Dakikada 600 istek işleme ve öncelikli destek için Pro sürüme
@@ -155,20 +155,31 @@ export default function DashboardPage() {
             Bugünkü Toplam İstek
           </span>
           <span className="text-sm text-zinc-500">
-            {stats?.today_requests ?? 0} istek
+            {stats?.today_requests ?? 0} / {stats?.plan_limit ?? 60} istek
           </span>
         </div>
-        <div className="w-full bg-zinc-800 rounded-full h-2">
+        <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
           <div
-            className="h-2 rounded-full transition-all duration-700 bg-indigo-500"
+            className={`h-2 rounded-full transition-all duration-1000 ease-out ${
+              usagePercent >= 95
+                ? "bg-red-500"
+                : usagePercent >= 80
+                ? "bg-amber-500"
+                : "bg-indigo-500"
+            }`}
             style={{
-              width: ready && (stats?.today_requests ?? 0) > 0 ? "100%" : "2px",
+              width: ready ? `${usagePercent}%` : "0%",
             }}
           />
         </div>
-        <p className="text-xs text-zinc-600 mt-2">
-          Dakika başı limit: {stats?.plan_limit ?? 60} istek
-        </p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-zinc-600">
+            Dakika başı limit: {stats?.plan_limit ?? 60} istek
+          </p>
+          <p className="text-xs text-zinc-500 font-medium">
+            %{Math.round(usagePercent)}
+          </p>
+        </div>
       </div>
 
       {/* Hızlı linkler */}
@@ -447,8 +458,8 @@ function StatusBadge({ code }: { code: number }) {
     code < 300
       ? "bg-emerald-500/10 text-emerald-400"
       : code < 400
-        ? "bg-amber-500/10 text-amber-400"
-        : "bg-red-500/10 text-red-400";
+      ? "bg-amber-500/10 text-amber-400"
+      : "bg-red-500/10 text-red-400";
   return (
     <span
       className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${color}`}

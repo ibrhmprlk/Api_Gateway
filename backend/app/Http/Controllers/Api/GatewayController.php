@@ -18,7 +18,6 @@ class GatewayController extends Controller
 
         $apiKey = $this->resolveApiKey($request);
         if (!$apiKey) return response()->json(['message' => 'Geçersiz API key.'], 401);
-        if (!($apiKey->permissions['weather'] ?? false)) return response()->json(['message' => 'Bu key için weather erişimi kapalı.'], 403);
         if (!$this->checkPlanAccess($apiKey, 'weather')) return response()->json(['message' => 'Weather erişimi planınıza dahil değil. Pro\'ya yükseltin.'], 403);
 
         $city = $request->city;
@@ -48,7 +47,6 @@ class GatewayController extends Controller
 
         $apiKey = $this->resolveApiKey($request);
         if (!$apiKey) return response()->json(['message' => 'Geçersiz API key.'], 401);
-        if (!($apiKey->permissions['exchange'] ?? false)) return response()->json(['message' => 'Bu key için exchange erişimi kapalı.'], 403);
         if (!$this->checkPlanAccess($apiKey, 'exchange')) return response()->json(['message' => 'Exchange erişimi planınıza dahil değil. Pro\'ya yükseltin.'], 403);
 
         $base     = strtoupper($request->base);
@@ -71,7 +69,6 @@ class GatewayController extends Controller
 
         $apiKey = $this->resolveApiKey($request);
         if (!$apiKey) return response()->json(['message' => 'Geçersiz API key.'], 401);
-        if (!($apiKey->permissions['countries'] ?? false)) return response()->json(['message' => 'Bu key için countries erişimi kapalı.'], 403);
         if (!$this->checkPlanAccess($apiKey, 'countries')) return response()->json(['message' => 'Countries erişimi planınıza dahil değil. Pro\'ya yükseltin.'], 403);
 
         $name     = $request->name;
@@ -100,18 +97,18 @@ class GatewayController extends Controller
         return response()->json($data);
     }
 
-   private function checkPlanAccess(ApiKey $apiKey, string $feature): bool
-{
-    $user = $apiKey->user;
-    if (!$user) return false;
+    private function checkPlanAccess(ApiKey $apiKey, string $feature): bool
+    {
+        $user = $apiKey->user;
+        if (!$user) return false;
 
-    $effectivePlan = ($user->plan === 'pro' && $user->subscription_status === 'active') ? 'pro' : 'free';
+        $effectivePlan = ($user->plan === 'pro' && $user->subscription_status === 'active') ? 'pro' : 'free';
 
-    $plan = Plan::whereRaw('LOWER(name) = ?', [$effectivePlan])->first();
-    if (!$plan) return false;
+        $plan = Plan::whereRaw('LOWER(name) = ?', [$effectivePlan])->first();
+        if (!$plan) return false;
 
-    return $plan->api_access[$feature] ?? false;
-}
+        return !empty($plan->api_access[$feature]);
+    }
 
     private function resolveApiKey(Request $request): ?ApiKey
     {

@@ -8,6 +8,8 @@ use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use Stripe\Webhook;
 use App\Models\Plan;
+use Carbon\Carbon;
+
 class BillingController extends Controller
 {
     public function __construct()
@@ -19,38 +21,42 @@ class BillingController extends Controller
     {
         $user = $request->user();
 
+        $plan = Plan::whereRaw('LOWER(name) = ?', [$user->plan])->first();
+
         return response()->json([
-            'plan'                => $user->plan,
+            'plan'                => $plan,
+            'user_plan'           => $user->plan,
             'subscription_status' => $user->subscription_status,
             'current_period_end'  => $user->current_period_end,
             'canceled_at'         => $user->canceled_at,
         ]);
     }
 
- public function checkout(Request $request)
-{
-    $user = $request->user();
-   $plan = Plan::whereRaw('LOWER(name) = ?', ['pro'])->firstOrFail();
+    public function checkout(Request $request)
+    {
+        $user = $request->user();
+        $plan = Plan::whereRaw('LOWER(name) = ?', ['pro'])->firstOrFail();
 
-    if ($user->plan === 'pro' && $user->subscription_status === 'active') {
-        return response()->json(['message' => 'Zaten Pro plandasınız.'], 422);
+        if ($user->plan === 'pro' && $user->subscription_status === 'active') {
+            return response()->json(['message' => 'Zaten Pro plandasınız.'], 422);
+        }
+
+        $session = Session::create([
+            'payment_method_types' => ['card'],
+            'mode'                 => 'subscription',
+            'customer_email'       => $user->email,
+            'line_items'           => [[
+                'price'    => $plan->stripe_price_id,
+                'quantity' => 1,
+            ]],
+            'success_url' => config('app.frontend_url') . '/billing?success=true',
+            'cancel_url'  => config('app.frontend_url') . '/billing?canceled=true',
+            'metadata'    => ['user_id' => $user->id],
+        ]);
+
+        return response()->json(['checkout_url' => $session->url]);
     }
 
-    $session = Session::create([
-        'payment_method_types' => ['card'],
-        'mode'                 => 'subscription',
-        'customer_email'       => $user->email,
-        'line_items'           => [[
-            'price'    => $plan->stripe_price_id, // veritabanından geliyor
-            'quantity' => 1,
-        ]],
-        'success_url' => config('app.frontend_url') . '/billing?success=true',
-        'cancel_url'  => config('app.frontend_url') . '/billing?canceled=true',
-        'metadata'    => ['user_id' => $user->id],
-    ]);
-
-    return response()->json(['checkout_url' => $session->url]);
-}
     public function cancel(Request $request)
     {
         $user = $request->user();
@@ -86,7 +92,6 @@ class BillingController extends Controller
             return response()->json(['message' => 'İptal edilmiş bir aboneliğiniz yok.'], 422);
         }
 
-        // Stripe'ta cancel_at_period_end'i kaldır
         $subscriptions = \Stripe\Subscription::all([
             'customer' => $user->stripe_customer_id,
         ]);
@@ -124,38 +129,47 @@ class BillingController extends Controller
             case 'checkout.session.completed':
                 $session = $event->data->object;
                 $userId  = $session->metadata->user_id;
+                $user    = \App\Models\User::find($userId);
 
-                $user = \App\Models\User::find($userId);
-                if ($user) {
+                if ($user && $session->subscription) {
+                    $subscription = \Stripe\Subscription::retrieve($session->subscription);
                     $user->update([
                         'plan'                => 'pro',
                         'subscription_status' => 'active',
                         'stripe_customer_id'  => $session->customer,
-                        'current_period_end'  => now()->addMonth(),
+                        'current_period_end'  => Carbon::createFromTimestamp($subscription->current_period_end),
                         'canceled_at'         => null,
+                    ]);
+
+                    // Pro'ya geçince mevcut key'lerin permissions'ını güncelle
+                    $user->apiKeys()->update([
+                        'permissions' => json_encode([
+                            'weather'   => true,
+                            'exchange'  => true,
+                            'countries' => true,
+                        ]),
                     ]);
                 }
                 break;
 
             case 'invoice.payment_succeeded':
-                $invoice    = $event->data->object;
-                $customerId = $invoice->customer;
+                $invoice = $event->data->object;
+                $user    = \App\Models\User::where('stripe_customer_id', $invoice->customer)->first();
 
-                $user = \App\Models\User::where('stripe_customer_id', $customerId)->first();
-                if ($user) {
+                if ($user && $invoice->subscription) {
+                    $subscription = \Stripe\Subscription::retrieve($invoice->subscription);
                     $user->update([
                         'subscription_status' => 'active',
-                        'current_period_end'  => now()->addMonth(),
+                        'current_period_end'  => Carbon::createFromTimestamp($subscription->current_period_end),
                         'canceled_at'         => null,
                     ]);
                 }
                 break;
 
             case 'invoice.payment_failed':
-                $invoice    = $event->data->object;
-                $customerId = $invoice->customer;
+                $invoice = $event->data->object;
+                $user    = \App\Models\User::where('stripe_customer_id', $invoice->customer)->first();
 
-                $user = \App\Models\User::where('stripe_customer_id', $customerId)->first();
                 if ($user) {
                     $user->update(['subscription_status' => 'past_due']);
                 }
@@ -163,14 +177,22 @@ class BillingController extends Controller
 
             case 'customer.subscription.deleted':
                 $subscription = $event->data->object;
-                $customerId   = $subscription->customer;
+                $user         = \App\Models\User::where('stripe_customer_id', $subscription->customer)->first();
 
-                $user = \App\Models\User::where('stripe_customer_id', $customerId)->first();
                 if ($user) {
                     $user->update([
                         'plan'                => 'free',
                         'subscription_status' => 'canceled',
                         'current_period_end'  => null,
+                    ]);
+
+                    // Free'ye düşünce key permissions'ları kısıtla
+                    $user->apiKeys()->update([
+                        'permissions' => json_encode([
+                            'weather'   => true,
+                            'exchange'  => false,
+                            'countries' => false,
+                        ]),
                     ]);
                 }
                 break;

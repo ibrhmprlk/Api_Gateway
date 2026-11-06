@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const GOOGLE_AUTH_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/redirect`;
+const GOOGLE_AUTH_URL = `${process.env.NEXT_PUBLIC_API_URL}/auth/google/redirect`;
 
 export default function RegisterPage() {
   const router = useRouter();

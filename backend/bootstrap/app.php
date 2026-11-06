@@ -13,6 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         /*
+         * Render gibi proxy arkasında çalışırken HTTPS ve gerçek host
+         * bilgisini doğru almak için proxy'lere güven.
+         */
+        $middleware->trustProxies(at: '*');
+
+        /*
          * Alias tanımları — rotalarda kısa isimle kullanmak için
          * Route::middleware('rate.limit') diyebileceğiz
          */

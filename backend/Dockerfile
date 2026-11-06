@@ -19,9 +19,9 @@ RUN php artisan filament:assets
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Nginx ve Supervisor ayarları
-RUN rm -f /etc/nginx/sites-enabled/default
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+# Render için Nginx + Supervisor
+RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf
+COPY docker/nginx.render.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 10000

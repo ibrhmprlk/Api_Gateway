@@ -3,6 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    command: php-fpm
     container_name: api_gateway_app
     restart: unless-stopped
     working_dir: /var/www
